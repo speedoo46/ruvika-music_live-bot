@@ -1,6 +1,6 @@
 import os
 import asyncio
-from pyrogram import Client, filters
+from pyrogram import Client, filters, compose
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream
 
@@ -16,11 +16,12 @@ call_py = PyTgCalls(user)
 
 @bot.on_message(filters.command("start"))
 async def start_handler(client, message):
+    print(f"Received start command from {message.from_user.id}", flush=True)
     await message.reply_text(
         "🎧 **Ruvika 24/7 VC Music Bot is Online!** 🎧\n\n"
         "Commands:\n"
-        "• `/play` - VC me live music start karein\n"
-        "• `/stop` - VC disconnect karein"
+        "• `/play` - Group VC me live streaming chalu karein\n"
+        "• `/stop` - VC stream band karein"
     )
 
 @bot.on_message(filters.command("play"))
@@ -38,24 +39,25 @@ async def stop_handler(client, message):
     chat_id = message.chat.id
     try:
         await call_py.leave_call(chat_id)
-        await message.reply_text("⏹️ Stream band kar di gayi hai.")
+        await message.reply_text("⏹️ Voice Chat stream band kar di gayi hai.")
     except Exception as e:
         await message.reply_text(f"⚠️ Error: `{str(e)}`")
 
-# Background me Assistant aur PyTgCalls ko start karne ka sahi event
-async def start_assistant():
+async def main():
+    # Dono accounts ko start karein
+    await bot.start()
     await user.start()
     await call_py.start()
-    print(">>> Assistant & PyTgCalls Connected Successfully! <<<", flush=True)
-
-# Jab bot start hoga, assistant automatically piche chalu ho jayega
-@bot.on_disconnect()
-async def on_stop():
+    print(">>> RUVIKA 24/7 VC BOT IS FULLY ONLINE & READY! <<<", flush=True)
+    
+    # Telegram update polling loop active rakhein
+    await idle()
+    
+    # Graceful shutdown
     await call_py.stop()
     await user.stop()
+    await bot.stop()
 
-# Pyrogram official loop starter
 if __name__ == "__main__":
-    asyncio.get_event_loop().create_task(start_assistant())
-    print(">>> BOT STARTED LISTENING TO TELEGRAM! <<<", flush=True)
-    bot.run()
+    from pyrogram import idle
+    asyncio.run(main())
