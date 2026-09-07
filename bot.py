@@ -55,5 +55,5 @@ async def start_services():
     print("Ruivika 24/7 VC Bot is Online!")
     await idle()
 
-if name == "main":
+if __name__ == "__main__":
     asyncio.run(start_services())
