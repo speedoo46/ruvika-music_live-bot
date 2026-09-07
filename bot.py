@@ -1,21 +1,36 @@
 import os
+import sys
 import asyncio
 from pyrogram import Client, filters
 from pytgcalls import PyTgCalls, idle
 from pytgcalls.types import MediaStream
 
-# Direct Telegram Credentials
+print("--- INITIALIZING BOT SCRIPT ---", flush=True)
+
 API_ID = 35563580
 API_HASH = "8603427418daa03b4d6a69ef493e6872"
 BOT_TOKEN = "8253242144:AAGrX7Hs3e7l3sN5D2K0UPfA6VGmX10uSZk"
 
-# CMD se generate hua aapka session string
-SESSION_STRING = "AQIeqDwAkvb9zKIDScNpDqUkS3PntZlnDVWD2e5xi38Gt08slAb6iB9Y1VSx3P8TVl1dwTil9_kTypoww4puVGWv6CNRFZN9GgUu3mANVfIyQR0gyoroykRn1ymx9ZAYwkg_7qGZWjA4aXy2QUI7_cThIyADTh9_AQQhckP-z1N4e5bqBgufh1aZ6HCYpAFtHC62w8Mr5QHZJNiFbJwmc1UQhtubSHesPOXb_SsIFPk3tFbujJrBiw4iB_q1Z6SVJXh0iLZ7xIKboBjjJ0KthrOOMiATER3FmtvB0IJ_jC73jx2RJbxRmJ84f_zXrz2gbb5Kz5u7ZQwRGBb9-TgR0MjG3z9vOQAAAAIKSphPAA"
-# 24/7 Live Radio / Music Stream URL
+# CMD se notepad me save hua session string yahan daalein
+SESSION_STRING = "AQIeqDwAt2hFUS_2JbKIWsX_8tiJ7M5tJewTemOFpNc4kpR1hDQ8utiAXPVda-gyld6R6Ae6mo-OkHdwMwStiwKgPU4FrxkjbdIXNlE04sKBFK63MB25kTsQxNMGxYhlsHdZQcdQclOfjwuRO7_VsrtlNoI8knq9GhstqS9hCISqXLP-UWwO_dlbg3U_pEam464caMKxPnF9uwAXcakclpllla3qnGZ3PFCkK7DRJ4bxb8ADll0_IWZs7Ta-peM6-HW-rrOd_AawfLNJopKDewONMvyf3NAbsdJKfOEmErme0tRdaenGLB9jT48BqFAAA"
+
 STREAM_URL = "https://radioindia.net/radio/mirchi98/icecast.audio"
 
-bot = Client("RuvikaBot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
-user = Client("RuvikaAssistant", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING)
+bot = Client(
+    "RuvikaBot",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    bot_token=BOT_TOKEN
+)
+
+user = Client(
+    "RuvikaAssistant",
+    api_id=API_ID,
+    api_hash=API_HASH,
+    session_string=SESSION_STRING,
+    in_memory=True
+)
+
 call_py = PyTgCalls(user)
 
 @bot.on_message(filters.command("start"))
@@ -31,13 +46,12 @@ async def start_cmd(client, message):
 async def play_vc(client, message):
     chat_id = message.chat.id
     status = await message.reply_text("🔄 Joining Voice Chat...")
-    
     try:
         await call_py.play(
             chat_id,
             MediaStream(STREAM_URL)
         )
-        await status.edit_text("🎶 **24/7 Music is now LIVE in Voice Chat!** 📻\nNon-stop stream chalu ho chuki hai.")
+        await status.edit_text("🎶 **24/7 Music is now LIVE in Voice Chat!** 📻")
     except Exception as e:
         await status.edit_text(f"⚠️ Error: `{str(e)}`")
 
@@ -50,15 +64,23 @@ async def stop_vc(client, message):
     except Exception as e:
         await message.reply_text(f"⚠️ Error: `{str(e)}`")
 
-async def start_services():
-    print("Starting Bot...")
-    await bot.start()
-    print("Starting Assistant...")
-    await user.start()
-    print("Starting PyTgCalls...")
-    await call_py.start()
-    print("Ruivika 24/7 VC Bot is Online!")
-    await idle()
+async def main():
+    try:
+        print("Starting Bot Client...", flush=True)
+        await bot.start()
+        print("Bot Client Started!", flush=True)
+
+        print("Starting Assistant Client...", flush=True)
+        await user.start()
+        print("Assistant Client Started!", flush=True)
+
+        print("Starting PyTgCalls...", flush=True)
+        await call_py.start()
+        print(">>> RUVIKA 24/7 VC BOT IS FULLY ONLINE! <<<", flush=True)
+
+        await idle()
+    except Exception as e:
+        print(f"FATAL STARTUP ERROR: {e}", flush=True)
 
 if __name__ == "__main__":
-    asyncio.run(start_services())
+    asyncio.run(main())
