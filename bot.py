@@ -1,6 +1,6 @@
 import os
 import asyncio
-from pyrogram import Client, filters, idle
+from pyrogram import Client, filters
 from pytgcalls import PyTgCalls
 from pytgcalls.types import MediaStream
 
@@ -14,42 +14,48 @@ bot = Client("RuvikaBot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 user = Client("RuvikaAssistant", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING, in_memory=True)
 call_py = PyTgCalls(user)
 
-# Har message ko print karne ke liye (Debug)
-@bot.on_message()
-async def all_incoming(client, message):
-    text = message.text or ""
-    print(f">> Incoming update: {text} from {message.chat.id}", flush=True)
-    
-    if text.startswith("/start"):
-        await message.reply_text(
-            "🎧 **Ruvika 24/7 VC Music Bot is Active!** 🎧\n\n"
-            "Commands:\n"
-            "• `/play` - Group Voice Chat me live streaming shuru karein\n"
-            "• `/stop` - Voice Chat stream band karein"
-        )
-    elif text.startswith("/play"):
-        status = await message.reply_text("🔄 Connecting to Voice Chat...")
-        try:
-            await call_py.play(message.chat.id, MediaStream(STREAM_URL))
-            await status.edit_text("🎶 **24/7 Music is now LIVE in Voice Chat!** 📻\nRadio stream chalu hai!")
-        except Exception as e:
-            print(f">> VC Error: {e}", flush=True)
-            await status.edit_text(f"⚠️ VC Error: `{str(e)}`")
-    elif text.startswith("/stop"):
-        try:
-            await call_py.leave_call(message.chat.id)
-            await message.reply_text("⏹️ Voice Chat band kar di gayi hai.")
-        except Exception as e:
-            await message.reply_text(f"⚠️ Error: `{str(e)}`")
+@bot.on_message(filters.command("start"))
+async def start_handler(client, message):
+    await message.reply_text(
+        "🎧 **Ruvika 24/7 VC Music Bot is Online!** 🎧\n\n"
+        "Commands:\n"
+        "• `/play` - VC me live music start karein\n"
+        "• `/stop` - VC disconnect karein"
+    )
 
-async def run_bot():
-    print("Connecting Clients...", flush=True)
-    await bot.start()
+@bot.on_message(filters.command("play"))
+async def play_handler(client, message):
+    chat_id = message.chat.id
+    status = await message.reply_text("🔄 Connecting to Voice Chat...")
+    try:
+        await call_py.play(chat_id, MediaStream(STREAM_URL))
+        await status.edit_text("🎶 **24/7 Music is now LIVE in Voice Chat!** 📻")
+    except Exception as e:
+        await status.edit_text(f"⚠️ Error: `{str(e)}`")
+
+@bot.on_message(filters.command("stop"))
+async def stop_handler(client, message):
+    chat_id = message.chat.id
+    try:
+        await call_py.leave_call(chat_id)
+        await message.reply_text("⏹️ Stream band kar di gayi hai.")
+    except Exception as e:
+        await message.reply_text(f"⚠️ Error: `{str(e)}`")
+
+# Background me Assistant aur PyTgCalls ko start karne ka sahi event
+async def start_assistant():
     await user.start()
     await call_py.start()
-    print(">>> BOT FULLY ACTIVE & WAITING FOR COMMANDS <<<", flush=True)
-    await idle()
+    print(">>> Assistant & PyTgCalls Connected Successfully! <<<", flush=True)
 
+# Jab bot start hoga, assistant automatically piche chalu ho jayega
+@bot.on_disconnect()
+async def on_stop():
+    await call_py.stop()
+    await user.stop()
+
+# Pyrogram official loop starter
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run_bot())
+    asyncio.get_event_loop().create_task(start_assistant())
+    print(">>> BOT STARTED LISTENING TO TELEGRAM! <<<", flush=True)
+    bot.run()
