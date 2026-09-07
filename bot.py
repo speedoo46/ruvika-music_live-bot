@@ -9,6 +9,14 @@ API_ID = 35563580
 API_HASH = "8603427418daa03b4d6a69ef493e6872"
 BOT_TOKEN = "8253242144:AAGrX7Hs3e7l3sN5D2K0UPfA6VGmX10uSZk"
 SESSION_STRING = "AQIeqDwAkvb9zKIDScNpDqUkS3PntZlnDVWD2e5xi38Gt08slAb6iB9Y1VSx3P8TVl1dwTil9_kTypoww4puVGWv6CNRFZN9GgUu3mANVfIyQR0gyoroykRn1ymx9ZAYwkg_7qGZWjA4aXy2QUI7_cThIyADTh9_AQQhckP-z1N4e5bqBgufh1aZ6HCYpAFtHC62w8Mr5QHZJNiFbJwmc1UQhtubSHesPOXb_SsIFPk3tFbujJrBiw4iB_q1Z6SVJXh0iLZ7xIKboBjjJ0KthrOOMiATER3FmtvB0IJ_jC73jx2RJbxRmJ84f_zXrz2gbb5Kz5u7ZQwRGBb9-TgR0MjG3z9vOQAAAAIKSphPAA"
+
+STREAM_URL = "https://radioindia.net/radio/mirchi98/icecast.audio"
+
+# Clients definition (Line 15 se pehle hona zaroori hai)
+bot = Client("RuvikaBot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+user = Client("RuvikaAssistant", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING, in_memory=True)
+call_py = PyTgCalls(user)
+
 @bot.on_message(filters.command(["start", "start@ruvika_music_bot"]))
 async def start_cmd(client, message):
     print(f"[CMD] Start from {message.from_user.id}", flush=True)
