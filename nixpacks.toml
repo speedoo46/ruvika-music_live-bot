@@ -1,2 +1,0 @@
-[phases.setup]
-aptPkgs = ["libx11-6", "ffmpeg", "libopus0", "libasound2"]
